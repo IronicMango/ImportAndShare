@@ -2,9 +2,9 @@
 	"autodeskProduct":	"Fusion360",
 	"type":	"addin",
 	"id":	"f17241b9-58e2-45d7-89cd-c1fb3c4950ae",
-	"author":	"Patrick Rainsberry",
+	"authors":	"Patrick Rainsberry and Trevor Holloway",
 	"description":	{
-		"":	"Demo Addin to import and create public share links."
+		"":	"Imports STEP files to current directory and generates share link with options for adding materials and pushing to AirTable."
 	},
 	"version":	"1.0",
 	"runOnStartup":	false,

@@ -15,7 +15,7 @@ DEBUG = True
 # that need a unique name. It's also recommended to use a company name as 
 # part of the ID to better ensure the ID is unique.
 ADDIN_NAME = os.path.basename(os.path.dirname(__file__))
-COMPANY_NAME = 'Autodesk'
+COMPANY_NAME = 'Ironic Mango Designs, LLC'
 
 
 # *********** Global Variables Unique to this Add-in **************
@@ -26,11 +26,25 @@ imported_filenames = []
 # Keep track of imported files
 imported_documents = {}
 
-# Output csv file to record results.
-csv_file_name = os.path.join(os.path.dirname(__file__), 'output.csv')
+#This is for reporting export errors
+export_Errors = []
+
+#This is the airtable link given in the API documentation for the table you want to use.
+at_api_url = "*******************************"
+
+
+# Keep track of material
+custom_Appearance = None
+
+# Names of ropes as imported
+body_Name_IDs = ["some" , "strings", "go", "here"]
+
+# For getting API key
+at_key = ""
+API_Key_Good = False
 
 # Extension types that will be processed for import
-EXTENSION_TYPES = ['.step', '.stp']
+EXTENSION_TYPES = ['.step', '.stp', '.STEP','.STP']
 
 custom_event_id_import = 'custom_event_import'
 custom_event_id_save = 'custom_event_id_save'
