@@ -6,6 +6,7 @@ from .importFolder import entry as import_folder
 from .dataFileComplete import entry as complete
 from .closeAll import entry as close
 from .processRemaining import entry as remaining
+from .setParameters import entry as parameters
 
 # Fusion will automatically call the start() and stop() functions.
 commands = [
@@ -13,6 +14,7 @@ commands = [
     complete,
     close,
     remaining,
+    parameters,
 ]
 
 
