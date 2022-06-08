@@ -1,5 +1,6 @@
 import json
 import time
+from turtle import goto
 
 import adsk.core
 import os
@@ -95,6 +96,11 @@ def command_execute(args: adsk.core.CommandEventArgs):
     # General logging for debug.
     futil.log(f'{CMD_NAME} Command Execute Event')
 
+    # Ensure we have a good API key
+    if config.API_Key_Good != True :
+        ui.messageBox("API key not valid. Make sure to run the 'Set Parameters' function successfully prior to Import")
+        return
+    
     # Have User select a folder containing STEP Files to be imported
     folder_dialog = ui.createFolderDialog()
     folder_dialog.title = "Select Folder"
@@ -113,6 +119,27 @@ def command_execute(args: adsk.core.CommandEventArgs):
         ui.messageBox("You probably are navigated to a project in the data panel. "
                       "For example, can't be in recent documents.")
         return
+
+
+    # For simplicity, we will later be using the first appearance in 'Favorites' so this block ensures 
+    # that material is the one we are looking for
+    config.custom_Appearance = app.favoriteAppearances.item(0)
+    try:
+        favorites_Index = 0
+        while config.custom_Appearance.name != "nameOfAppearance" or favorites_Index >= app.favoriteAppearances.count:
+            favorites_Index = favorites_Index +1
+            config.custom_Appearance = app.favoriteAppearances.item(favorites_Index)
+        if config.custom_Appearance.name != "nameOfAppearance" :
+            ui.messageBox("The appearance known as 'nameOfAppearance' must be in your 'Favorites' "
+                          "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
+                          "folder. Restart Fusion 360 for changes to take effect.")
+            return
+    except:
+        ui.messageBox("The appearance known as 'nameOfAppearance' must be in your 'Favorites' "
+                      "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
+                      "folder. Restart Fusion 360 for changes to take effect.")
+        return
+
 
     config.results = []
     config.run_finished = False
