@@ -94,11 +94,20 @@ def command_execute(args: adsk.core.CommandEventArgs):
     # General logging for debug.
     futil.log(f'{CMD_NAME} Command Execute Event')
 
-    all_docs = [document for document in app.documents]
+    all_docs = app.documents
 
     doc: adsk.core.Document
-    for doc in all_docs:
+
+    q=0
+    while q < all_docs.count:
+        config.imported_filenames.append(all_docs.item(q).dataFile.name)
+        q = q + 1
+
+    q=0
+    while q < all_docs.count:
+        doc = all_docs.item(q)
         data_file = doc.dataFile
+        q = q+1
         if data_file and data_file.isComplete:
             process_data_file(data_file)
 
