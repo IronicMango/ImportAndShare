@@ -99,15 +99,17 @@ def handle_import(args: adsk.core.CustomEventArgs):
     #Change the rope material
     design = new_document.design
     ##Get rope body
-    all_Components = design.allComponents
-    for component in all_Components:
-        body_Name = component.name
-        for name_ID in config.body_Name_IDs :
-            if name_ID in body_Name:
-                if component.bRepBodies.count != 0 :
-                    comp_Bodies = component.bRepBodies
-                    comp_Body = comp_Bodies.itemByName("Body1")
-                    comp_Body.appearance = config.custom_Appearance
+    for name_ID in config.body_Name_IDs :
+        add_appearances(name_ID, config.custom_Appearance, design)
+    # all_Components = design.allComponents
+    # for component in all_Components:
+    #     body_Name = component.name
+    #     for name_ID in config.body_Name_IDs :
+    #         if name_ID in body_Name:
+    #             if component.bRepBodies.count != 0 :
+    #                 comp_Bodies = component.bRepBodies
+    #                 comp_Body = comp_Bodies.itemByName("Body1")
+    #                 comp_Body.appearance = config.custom_Appearance
         
 
     # Fire event to save the document
@@ -163,33 +165,41 @@ def process_data_file(data_file: adsk.core.DataFile):
             futil.log(f"**********Created public link for {data_file.name}: {public_link}")
 
             # Record Data
-            data = {
-                "fields": {
-                    "Name": data_file.name,
-                    "URN": data_file.versionId,
-                    "Link": public_link
+            if config.export_To_AirTable :
+                data = {
+                    "fields": {
+                        "Name": data_file.name,
+                        "URN": data_file.versionId,
+                        "Link": public_link
+                    }
                 }
-            }
 
-            # Write to Airtable
-            app_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            sys.path.insert(0, os.path.join(app_path, 'lib'))
+                # Write to Airtable
+                app_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                sys.path.insert(0, os.path.join(app_path, 'lib'))
 
-            # Post url and headers need to be here so that they pick up the changed API key
-            post_url = config.at_api_url
-            post_headers = {
-                'Authorization' : 'Bearer ' + config.at_key,
-                'Content-Type': 'application/json'
-            }
+                # Post url and headers need to be here so that they pick up the changed API key
+                post_url = config.at_api_url
+                post_headers = {
+                    'Authorization' : 'Bearer ' + config.at_key,
+                    'Content-Type': 'application/json'
+                }
 
-            # The following line may register an error in VSCode. If your file structure is correct, this should
-            #   be inconsequential and will run correctly
-            import requests
-            post_airtable_request = requests.post(post_url, headers = post_headers, json = data)
-            print(post_airtable_request.status_code)
-            if post_airtable_request.status_code != 200 :
-                    config.export_Errors.append("Export error code: " + str(post_airtable_request.status_code) + "      File: " + data_file.name)
-            remove_from_path(os.path.join(app_path, 'lib'))
+                # The following line may register an error in VSCode. If your file structure is correct, this should
+                #   be inconsequential and will run correctly
+                import requests
+                post_airtable_request = requests.post(post_url, headers = post_headers, json = data)
+                print(post_airtable_request.status_code)
+                if post_airtable_request.status_code != 200 :
+                        config.export_Errors.append("Export error code: " + str(post_airtable_request.status_code) + "      File: " + data_file.name)
+                remove_from_path(os.path.join(app_path, 'lib'))
+
+            if config.export_To_CSV :
+                config.results.append({
+                    'Name': data_file.name,
+                    'URN': data_file.versionId,
+                    'Link': public_link
+                })
 
             config.imported_filenames.remove(data_file.name)
 
@@ -207,6 +217,8 @@ def process_data_file(data_file: adsk.core.DataFile):
         if len(config.imported_filenames) == 0:
             if not config.run_finished:
                 config.run_finished = True
+                if config.export_To_CSV :
+                    write_results()
             if not config.export_Errors :
                 ui.messageBox("Process Completed Succesfully. If files are left open, please use the 'Close All' function")
             else :
@@ -221,3 +233,22 @@ def process_data_file(data_file: adsk.core.DataFile):
         # futil.log(f"**********Already processed: {data_file.name}")
         ...
 
+
+def write_results():
+    futil.log(f"Writing CSV")
+    with open(config.csv_File_Name, mode='w') as csv_file:
+        fieldnames = ['Name', 'URN', 'Link']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in config.results:
+            writer.writerow(row)
+
+def add_appearances(body_Name_ID, custom_Appearance,current_Design):
+    all_Components = current_Design.allComponents
+    for component in all_Components:
+        body_Name = component.name
+        if body_Name_ID in body_Name:
+            if component.bRepBodies.count != 0 :
+                comp_Bodies = component.bRepBodies
+                comp_Body = comp_Bodies.itemByName("Body1")
+                comp_Body.appearance = custom_Appearance

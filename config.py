@@ -15,7 +15,7 @@ DEBUG = True
 # that need a unique name. It's also recommended to use a company name as 
 # part of the ID to better ensure the ID is unique.
 ADDIN_NAME = os.path.basename(os.path.dirname(__file__))
-COMPANY_NAME = 'Ironic Mango Designs, LLC'
+COMPANY_NAME = 'Ironic Mango Designs'
 
 
 # *********** Global Variables Unique to this Add-in **************
@@ -30,14 +30,23 @@ imported_documents = {}
 export_Errors = []
 
 #This is the airtable link given in the API documentation for the table you want to use.
-at_api_url = "*******************************"
+at_api_url = ""
 
+# For Export Type(s)
+export_To_CSV = False
+export_To_AirTable = False
+
+# CSV filename
+csv_File_Name = None
+
+# Appearance Names
+appearance_Names = []
 
 # Keep track of material
 custom_Appearance = None
 
 # Names of ropes as imported
-body_Name_IDs = ["some" , "strings", "go", "here"]
+body_Name_IDs = []
 
 # For getting API key
 at_key = ""

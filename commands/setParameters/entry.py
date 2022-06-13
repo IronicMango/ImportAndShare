@@ -96,22 +96,75 @@ def command_created(args: adsk.core.CommandCreatedEventArgs):
     futil.add_handler(cmd.destroy, command_destroy, local_handlers=local_handlers)
 
     # *******************Add handler for the Change event of the command
-    #futil.add_handler(cmd.destroy, command_destroy, local_handlers=local_handlers)
+    futil.add_handler(cmd.inputChanged, command_inputChanged, local_handlers=local_handlers)
 
     # Get the CommandInputs collection associated with the command.
     inputs = cmd.commandInputs
 
     # Create a tab input.
-    tabCmdInput1 = inputs.addTabCommandInput('API_Usage', 'API')
+    tabCmdInput1 = inputs.addTabCommandInput('Export_Options', 'Export Options')
     tab1ChildInputs = tabCmdInput1.children
 
-    # Create a string value input.
+    # Select Export Type(s)
+    radioButtonGroup = tab1ChildInputs.addRadioButtonGroupCommandInput('exportSelections', 'Choose Export Type')
+    radioButtonItems = radioButtonGroup.listItems
+    radioButtonItems.add("CSV", True)
+    radioButtonItems.add("AirTable", False)
+
+    # Create a string value input for the API key.
     key_Input = tab1ChildInputs.addStringValueInput('APIKeyInput', 'Your API Key', 'Key*************')
-    key_Input.isPassword = False
+    # key_Input.isPassword = True
+    key_Input.isVisible = False
+
+    # Hide/Show API value
+    # hide_Key_Option = tab1ChildInputs.addBoolValueInput('APIHidden', 'Hide Value', True, '', False)
+    # hide_Key_Option.isVisible = False
+
+    # Create a string value input for the AT URL key.
+    URL_Input = tab1ChildInputs.addStringValueInput('ATURLInput', 'AirTable URL', '')
+    URL_Input.isVisible = False
     
+
+    # Create a second tab Input
+    tabCmdInput2 = inputs.addTabCommandInput('Appearance_Options', 'Appearance Options')
+    tab2ChildInputs = tabCmdInput2.children
+
+    # *** This section is a temporary way of testing things. All this will change ***
+    # Create a string value input for the BODY ID key.
+    body_Input = tab2ChildInputs.addStringValueInput('BodyNameID', 'Body Name ID', 'ft Tracer Bar 2.')
+    # Create a string value input for the Appearance Name.
+    app_Input = tab2ChildInputs.addStringValueInput('AppearanceName', 'Appearance Name', 'LukeLampRope')
+
+
     # Add handler for the execute event of the command
     futil.add_handler(cmd.execute, command_execute, local_handlers=local_handlers)
 
+
+# This event handler is called to react to any changes in the command inputs.
+def command_inputChanged(args: adsk.core.InputChangedEventArgs):
+    # General logging for debug.
+    futil.log(f'{CMD_NAME} Command inputChanged Event')
+    
+    eventArgs = adsk.core.InputChangedEventArgs.cast(args)
+    inputs = eventArgs.inputs
+    cmdInput = eventArgs.input
+    # Hidden Key Change
+    # if cmdInput.id == "APIHidden" :
+    #     if inputs.itemById("APIHidden").value == False :
+    #         inputs.itemById('APIKeyInput').isPassword = False
+    #     else :
+    #         inputs.itemById('APIKeyInput').isPassword = True
+
+    # Show AirTable Options
+    if cmdInput.id == "exportSelections" :
+        if inputs.itemById('exportSelections').listItems.item(1).isSelected :
+            inputs.itemById("APIKeyInput").isVisible = True
+            # inputs.itemById("APIHidden").isVisible = True
+            inputs.itemById("ATURLInput").isVisible = True
+        else :
+            inputs.itemById("APIKeyInput").isVisible = False
+            # inputs.itemById("APIHidden").isVisible = False
+            inputs.itemById("ATURLInput").isVisible = False
 
 # This event handler is called when the user clicks the OK button in the command dialog or 
 # is immediately called after the created event not command inputs were created for the dialog.
@@ -124,59 +177,64 @@ def command_execute(args: adsk.core.CommandEventArgs):
     inputs = eventArgs.command.commandInputs
     
     config.at_key = inputs.itemById('APIKeyInput').value
+    config.at_api_url = inputs.itemById('ATURLInput').value
+    config.appearance_Names.append(inputs.itemById('AppearanceName').value)
+    config.body_Name_IDs.append(inputs.itemById('BodyNameID').value)
+    config.export_To_CSV = inputs.itemById('exportSelections').listItems.item(0).isSelected
+    config.export_To_AirTable = inputs.itemById('exportSelections').listItems.item(1).isSelected
 
     # *********We will now do a basic get request from airtable to ensure that the API key is good
     # Setup for test post to AirTable
-    post_url = config.at_api_url
-    post_headers = {
-        'Authorization' : 'Bearer ' + config.at_key,
-        'Content-Type': 'application/json'
-    }
-
-    # Dummy Data for blank Post
-    data = {
-        "fields": {
-            "Name": "Auth Test",
-            "URN": "Auth Test",
-            "Link": "Auth Test"
+    if config.export_To_AirTable :
+        post_url = config.at_api_url
+        post_headers = {
+            'Authorization' : 'Bearer ' + config.at_key,
+            'Content-Type': 'application/json'
         }
-    }
 
-    # write to Airtable
-    app_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    # app_path = app_path[0:101]
-    sys.path.insert(0, os.path.join(app_path, 'lib'))
-    # The following line may register an error in VSCode. If your file structure is correct, this should
-    #  be inconsequential and will run correctly
-    import requests
-    post_airtable_request = requests.post(post_url, headers = post_headers, json = data)
-    print(post_airtable_request.status_code)
-    if post_airtable_request.status_code != 200 :
-        config.API_Key_Good = False
-        ui.messageBox(f'API Key unauthorized or invalid.\nError Code:   {post_airtable_request.status_code}')
-        return
-    
-    # Get the post ID from the authorization post
-    post_airtable_request.raise_for_status
-    request_Result = post_airtable_request.json()
-    post_ID = request_Result["id"]
+        # Dummy Data for blank Post
+        data = {
+            "fields": {
+                "Name": "Auth Test",
+                "URN": "Auth Test",
+                "Link": "Auth Test"
+            }
+        }
 
-    # Setup for deleting from AirTable
-    delete_url = config.at_api_url + '/' + post_ID
-    delete_headers = {
-        'Authorization' : 'Bearer ' + config.at_key,
-    }
+        # write to Airtable
+        app_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        # app_path = app_path[0:101]
+        sys.path.insert(0, os.path.join(app_path, 'lib'))
+        # The following line may register an error in VSCode. If your file structure is correct, this should
+        #  be inconsequential and will run correctly
+        import requests
+        post_airtable_request = requests.post(post_url, headers = post_headers, json = data)
+        print(post_airtable_request.status_code)
+        if post_airtable_request.status_code != 200 :
+            config.API_Key_Good = False
+            ui.messageBox(f'API Key unauthorized or invalid.\nError Code:   {post_airtable_request.status_code}')
+            return
+        
+        # Get the post ID from the authorization post
+        post_airtable_request.raise_for_status
+        request_Result = post_airtable_request.json()
+        post_ID = request_Result["id"]
 
-    # Delete the test post
-    delete_airtable_request = requests.delete(delete_url, headers = delete_headers)
-    print(delete_airtable_request.status_code)
-    if delete_airtable_request.status_code != 200 :
-        ui.messageBox(f'Post request succeeded, but the post was unable to be removed.\nError Code:   {delete_airtable_request.status_code}')
+        # Setup for deleting from AirTable
+        delete_url = config.at_api_url + '/' + post_ID
+        delete_headers = {
+            'Authorization' : 'Bearer ' + config.at_key,
+        }
 
+        # Delete the test post
+        delete_airtable_request = requests.delete(delete_url, headers = delete_headers)
+        print(delete_airtable_request.status_code)
+        if delete_airtable_request.status_code != 200 :
+            ui.messageBox(f'Post request succeeded, but the post was unable to be removed.\nError Code:   {delete_airtable_request.status_code}')
 
-    remove_from_path(os.path.join(app_path, 'lib'))
+        remove_from_path(os.path.join(app_path, 'lib'))
 
-    config.API_Key_Good = True
+        config.API_Key_Good = True
 
     
 

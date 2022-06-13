@@ -1,6 +1,9 @@
 Import And Share
 ================
-Demo Addin to import STEP files and create public share links.
+Imports STEP files to current directory and generates share link with options for adding materials and pushing to AirTable.
+
+THESE INSTRUCTIONS ARE INCOMPLETE AND THE CODE IS NOT YET FULLY FUNCTIONAL
+--------------------------------------------------------------------------
 
 .. image:: resources/readMeCover.png
 

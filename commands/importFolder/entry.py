@@ -96,9 +96,13 @@ def command_execute(args: adsk.core.CommandEventArgs):
     # General logging for debug.
     futil.log(f'{CMD_NAME} Command Execute Event')
 
-    # Ensure we have a good API key
-    if config.API_Key_Good != True :
-        ui.messageBox("API key not valid. Make sure to run the 'Set Parameters' function successfully prior to Import")
+    # Checking for errors with the Set Parameters Function
+    if config.export_To_AirTable :
+        if config.API_Key_Good != True :
+            ui.messageBox("API key not valid. Make sure to run the 'Set Parameters' function successfully prior to Import.")
+            return
+    if config.export_To_CSV == False and config.export_To_AirTable == False :
+        ui.messageBox("You must export to a CSV or export to Airtable. Make sure to run the 'Set Parameters' function successfully prior to Import.")
         return
     
     # Have User select a folder containing STEP Files to be imported
@@ -107,6 +111,7 @@ def command_execute(args: adsk.core.CommandEventArgs):
     dialog_result = folder_dialog.showDialog()
     if dialog_result == adsk.core.DialogResults.DialogOK:
         folder = folder_dialog.folder
+        config.csv_File_Name = os.path.join(folder, 'output.csv')
     else:
         return
 
@@ -123,22 +128,25 @@ def command_execute(args: adsk.core.CommandEventArgs):
 
     # For simplicity, we will later be using the first appearance in 'Favorites' so this block ensures 
     # that material is the one we are looking for
-    config.custom_Appearance = app.favoriteAppearances.item(0)
-    try:
-        favorites_Index = 0
-        while config.custom_Appearance.name != "nameOfAppearance" or favorites_Index >= app.favoriteAppearances.count:
-            favorites_Index = favorites_Index +1
-            config.custom_Appearance = app.favoriteAppearances.item(favorites_Index)
-        if config.custom_Appearance.name != "nameOfAppearance" :
-            ui.messageBox("The appearance known as 'nameOfAppearance' must be in your 'Favorites' "
-                          "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
-                          "folder. Restart Fusion 360 for changes to take effect.")
+    # 
+    for app_Name in config.appearance_Names :
+        temp_appearance = app.favoriteAppearances.item(0)
+        try:
+            favorites_Index = 0
+            while temp_appearance.name != app_Name or favorites_Index >= app.favoriteAppearances.count:
+                favorites_Index = favorites_Index +1
+                temp_appearance = app.favoriteAppearances.item(favorites_Index)
+            if temp_appearance.name != app_Name :
+                ui.messageBox("The appearance known as {config.appearance_Names} must be in your 'Favorites' "
+                            "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
+                            "folder. Restart Fusion 360 for changes to take effect.")
+                return
+            config.custom_Appearance = temp_appearance
+        except:
+            ui.messageBox("The appearance known as {config.appearance_Names} must be in your 'Favorites' "
+                        "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
+                        "folder. Restart Fusion 360 for changes to take effect.")
             return
-    except:
-        ui.messageBox("The appearance known as 'nameOfAppearance' must be in your 'Favorites' "
-                      "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
-                      "folder. Restart Fusion 360 for changes to take effect.")
-        return
 
 
     config.results = []
