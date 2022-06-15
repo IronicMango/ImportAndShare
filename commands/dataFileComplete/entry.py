@@ -1,7 +1,5 @@
-from asyncio.windows_events import NULL
 import csv
 import json
-import time
 
 import adsk.core, adsk.fusion
 
@@ -99,18 +97,8 @@ def handle_import(args: adsk.core.CustomEventArgs):
     #Change the rope material
     design = new_document.design
     ##Get rope body
-    for name_ID in config.body_Name_IDs :
-        add_appearances(name_ID, config.custom_Appearance, design)
-    # all_Components = design.allComponents
-    # for component in all_Components:
-    #     body_Name = component.name
-    #     for name_ID in config.body_Name_IDs :
-    #         if name_ID in body_Name:
-    #             if component.bRepBodies.count != 0 :
-    #                 comp_Bodies = component.bRepBodies
-    #                 comp_Body = comp_Bodies.itemByName("Body1")
-    #                 comp_Body.appearance = config.custom_Appearance
-        
+    for Q, name_ID in enumerate(config.body_Name_IDs) :
+        add_appearances(name_ID, config.custom_Appearances[Q], design, config.body_Name_Match[Q])
 
     # Fire event to save the document
     event_data = {
@@ -243,12 +231,19 @@ def write_results():
         for row in config.results:
             writer.writerow(row)
 
-def add_appearances(body_Name_ID, custom_Appearance,current_Design):
+def add_appearances(body_Name_ID, custom_Appearance,current_Design,name_Match):
     all_Components = current_Design.allComponents
     for component in all_Components:
         body_Name = component.name
-        if body_Name_ID in body_Name:
-            if component.bRepBodies.count != 0 :
-                comp_Bodies = component.bRepBodies
-                comp_Body = comp_Bodies.itemByName("Body1")
-                comp_Body.appearance = custom_Appearance
+        if name_Match == False :
+            if body_Name_ID in body_Name:
+                if component.bRepBodies.count != 0 :
+                    comp_Bodies = component.bRepBodies
+                    comp_Body = comp_Bodies.itemByName("Body1")
+                    comp_Body.appearance = custom_Appearance
+        else :
+            if body_Name_ID == body_Name:
+                if component.bRepBodies.count != 0 :
+                    comp_Bodies = component.bRepBodies
+                    comp_Body = comp_Bodies.itemByName("Body1")
+                    comp_Body.appearance = custom_Appearance

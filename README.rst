@@ -2,29 +2,56 @@ Import And Share
 ================
 Imports STEP files to current directory and generates share link with options for adding materials and pushing to AirTable.
 
-THESE INSTRUCTIONS ARE INCOMPLETE AND THE CODE IS NOT YET FULLY FUNCTIONAL
---------------------------------------------------------------------------
 
 .. image:: resources/readMeCover.png
 
-This sample application makes use of the new Data Event
-that is fired when the cloud data (DataFile) is available
-for a newly saved (or imported) Fusion 360 Document.
+This Add_In allows for the batch import of STEP files, and will generate share links for all imported files. In addition, functionality is included to apply appearances automatically on import, and it also includes the option to export the share links as either a CSV file, or have them pushed out to an AirTable base.
 
 `Learn More <https://help.autodesk.com/view/fusion360/ENU/?guid=GUID-049CC6A8-10A5-47AD-B5DE-10B29721548A>`_
 
 
 Usage
 -----
+At the end of this section there are instructions for how to set up an AirTable base, retrieve your API key, and find the base URL if you wish to use that functionality. If not then continue below.
+
 Run the app.
 
-Click the Icon on the Utilities Tab in the Add-ins Panel
+**Step 1: The first step is to run the "Set Parameters" command.**
+- Within the window that this launches, you will find options to save to AirTable or as a CSV. 
+- If you choose to save to AirTable, you will need to provide an API key and a URL for the base you wish to push to.
+- The second tab contains a table with three columns. This table is for applying any materials that you wish to specific bodies in the files you wish to import.
+  - The first column is the name of the body that you wish to add an appearance to. 
+  - The second column is the name of an Appearance (must be in your 'Favorites' folder) that you wish to apply the Appearance to.
+  - The thrid column is a check box. If it remains unchecked, it will look for any bodies which contain the text in the first column to apply the Appearance to.
+    - As an example by placing "ft I-Beam Section" in the first column, and leaving the box unchecked, the Add-In would apply the chosen material to "2ft I-Beam Section", "4.5ft I-Beam Section", "120ft I-Beam Section", etc. all in the same run.
 
-You will be prompted to select a directory
+**Step 2: Once you have set the parameters, run the "Import Folder" command.**
+- You will be prompted to select a directory. All STEP files in this directory will be imported to the active project and a share link will be created
+- Materials will be applied as files are imported if you set such things in the "Set Parameters" command.
+- If you selected to output as CSV, then the resulting Public-Share-links and Version ID's will be stored in a csv file in the selected folder with the original STEP files.
+- If you selected to push results to Airtable, then the resulting Public-Share-links and Version ID's will be shared the base specified.
 
-All STEP files in this directory will be imported to the active project and a share link will be created.
+**Step 3 (Optional): If the Add-In reports errors, you may use the "Close-All" command to close any files that remain open, fix any errors, then run the "Import Folder" command again.**
 
-The resulting Public-Share-links and Version ID's will be stored in a csv file in this directory called output.csv
+**Step 4 (Optional): If appropriate, you may also choose to use the "Process Remaining" command to process any files that remain open or may have been skipped in error.**
+
+For AirTable use
+^^^^^^^^^^^^^^^^
+If you wish to post your results to AirTable, first you will need to set up an empty base like so:
+
+.. image:: resources/AirTableBase.png
+
+It may contain other fields, but these three must be present as "single line text" fields. You will also need the API URL which you can find by clicking "Help," then selecting "API Documentation."
+
+.. image:: resources/APIDoc.png
+
+Scroll down to the "AUTHENTICATION" section and your URL can be found here after the word "curl":
+
+.. image:: resources/ATURL.png
+
+**Do NOT** use the URL under "EXAMPLE USING QUERY PARAMETER" as it won't work.
+
+Lastly, you can find your API key on your account page, as it mentions (and links to) in the image above.
 
 
 Installation
@@ -46,32 +73,14 @@ After you download and extract the zip file:
 4.	Select the directory named Export2D and click the open button
 5.	With it selected click the run button at the bottom of the dialog
 
-Sample Scripts
---------------
+Attribution
+-----------
+This Add-In is a fork of `ImportAndShare <https://github.com/tapnair/ImportAndShare>`_ by `Patrick Rainsberry <patrick.rainsberry@autodesk.com>`_. It relies heavily on his original work, and Patrick made significant contributions to helping get this version working as well. Thanks Patrick!
 
-You can follow the same procedure, but on the Scripts tab to run one of the smaller sample scripts
-as opposed to the Add-in.
+This Add-In also relies on the python `requests` library, for it's ability to push info to AirTable.
 
-.. image:: resources/scripts.png
+**Huge** thanks to the above contributors. 
 
-These scripts demonstrate smaller pieces of the functionality in a more isolated way.
-
-ImportDirectoryScript
-^^^^^^^^^^^^^^^^^^^^^
-
-This will import all STEP files in the selected directory and leave them open
-
-CreateShareLinksScript
-^^^^^^^^^^^^^^^^^^^^^
-
-This will create share links for all open documents and then close them if the cloud data is ready.
-
-ImportAndShareScript
-^^^^^^^^^^^^^^^^^^^^^
-
-This will perform the import, create share link, and close the files.
-The main difference here is that it does not create a command icon and is not using the full Add-in Framework.
-It does show the implementation of an Event Handler to react when the imported files are ready for processing.
 
 License
 -------
@@ -87,6 +96,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Authors
 -------
-`Import And Share` was written by `Patrick Rainsberry <patrick.rainsberry@autodesk.com>`_.
+`Import And Share` was originally written by `Patrick Rainsberry <patrick.rainsberry@autodesk.com>`_.
+This fork is modified with functionality added by `Ironic Mango Designs <https://IronicMango.com>`_.
 
 

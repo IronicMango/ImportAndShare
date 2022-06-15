@@ -1,7 +1,4 @@
 import json
-import time
-from turtle import goto
-
 import adsk.core
 import os
 from ...lib import fusion360utils as futil
@@ -137,13 +134,13 @@ def command_execute(args: adsk.core.CommandEventArgs):
                 favorites_Index = favorites_Index +1
                 temp_appearance = app.favoriteAppearances.item(favorites_Index)
             if temp_appearance.name != app_Name :
-                ui.messageBox("The appearance known as {config.appearance_Names} must be in your 'Favorites' "
+                ui.messageBox(f"The appearance known as {app_Name} must be in your 'Favorites' "
                             "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
                             "folder. Restart Fusion 360 for changes to take effect.")
                 return
-            config.custom_Appearance = temp_appearance
+            config.custom_Appearances.append(temp_appearance)
         except:
-            ui.messageBox("The appearance known as {config.appearance_Names} must be in your 'Favorites' "
+            ui.messageBox(f"The appearance known as {app_Name} must be in your 'Favorites' "
                         "folder. This material can be found on DropBox in the 'engineering -> Fusion360' "
                         "folder. Restart Fusion 360 for changes to take effect.")
             return

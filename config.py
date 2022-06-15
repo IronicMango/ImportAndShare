@@ -33,7 +33,7 @@ export_Errors = []
 at_api_url = ""
 
 # For Export Type(s)
-export_To_CSV = False
+export_To_CSV = True
 export_To_AirTable = False
 
 # CSV filename
@@ -43,13 +43,16 @@ csv_File_Name = None
 appearance_Names = []
 
 # Keep track of material
-custom_Appearance = None
+custom_Appearances = []
 
 # Names of ropes as imported
 body_Name_IDs = []
 
+# Match Body Names Exactly?
+body_Name_Match = []
+
 # For getting API key
-at_key = ""
+at_key = "Key*************"
 API_Key_Good = False
 
 # Extension types that will be processed for import
