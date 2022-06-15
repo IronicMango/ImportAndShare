@@ -17,6 +17,7 @@ At the end of this section there are instructions for how to set up an AirTable 
 Run the app.
 
 **Step 1: The first step is to run the "Set Parameters" command.**
+
 - Within the window that this launches, you will find options to save to AirTable or as a CSV. 
 - If you choose to save to AirTable, you will need to provide an API key and a URL for the base you wish to push to.
 - The second tab contains a table with three columns. This table is for applying any materials that you wish to specific bodies in the files you wish to import.
@@ -26,6 +27,7 @@ Run the app.
     - As an example by placing "ft I-Beam Section" in the first column, and leaving the box unchecked, the Add-In would apply the chosen material to "2ft I-Beam Section", "4.5ft I-Beam Section", "120ft I-Beam Section", etc. all in the same run.
 
 **Step 2: Once you have set the parameters, run the "Import Folder" command.**
+
 - You will be prompted to select a directory. All STEP files in this directory will be imported to the active project and a share link will be created
 - Materials will be applied as files are imported if you set such things in the "Set Parameters" command.
 - If you selected to output as CSV, then the resulting Public-Share-links and Version ID's will be stored in a csv file in the selected folder with the original STEP files.
@@ -97,6 +99,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Authors
 -------
 `Import And Share` was originally written by `Patrick Rainsberry <patrick.rainsberry@autodesk.com>`_.
+
 This fork is modified with functionality added by `Ironic Mango Designs <https://IronicMango.com>`_.
 
 
