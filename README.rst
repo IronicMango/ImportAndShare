@@ -2,6 +2,8 @@ Import And Share
 ================
 Imports STEP files to current directory and generates share link with options for adding materials and pushing to AirTable.
 
+This Add-In is a fork of `ImportAndShare <https://github.com/tapnair/ImportAndShare>`_ by `Patrick Rainsberry <patrick.rainsberry@autodesk.com>`_. It relies heavily on his original work, and Patrick made significant contributions to helping get this version working as well. Thanks Patrick!
+
 
 .. image:: resources/readMeCover.png
 
